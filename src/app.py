@@ -14,9 +14,10 @@ def put_to_cache():
 
     hash_value = xxh64(str_key).intdigest()
     healthy_nodes = elb_client.get_healthy_nodes()
-    target_node = hash_value % len(healthy_nodes)
+    target_node_idx = hash_value % len(healthy_nodes)
+    alt_target_node_idx = (target_node_idx + 1) % len(healthy_nodes)
 
-    return str(f"hash_value: {hash_value}, target_node: {target_node}, instance_id: {elb_client.instance_id}")
+    return str(f"hash_value: {hash_value}, target_node_idx: {target_node_idx}, alt_target_node_idx: {alt_target_node_idx}, alinstance_id: {elb_client.instance_id}")
 
 @app.route("/get")
 def get_from_cache():
