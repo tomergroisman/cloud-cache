@@ -2,7 +2,11 @@
 # set -o xtrace
 
 KEY_NAME="cloud-cache-`date +'%N'`"
-KEY_PEM="$KEY_NAME.pem"
+KEY_PEM=".pem/$KEY_NAME.pem"
+
+echo "create pem directory"
+mkdir -p .pem
+chmod 775 .pem
 
 echo "create key pair $KEY_PEM to connect to instances and save locally"
 aws ec2 create-key-pair --key-name $KEY_NAME \
