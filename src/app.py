@@ -31,7 +31,6 @@ def put_to_cache():
     return "Success"
     if error is not None:
         raise error 
-    # return str(f"hash_value: {hash_value}, target_node_idx: {target_node_idx}, alt_target_node_idx: {alt_target_node_idx}, alinstance_id: {client.instance_id}")
 
 @app.route("/get")
 def get_from_cache():
