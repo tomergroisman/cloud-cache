@@ -3,9 +3,9 @@ sudo apt update
 # Setup AWS CLI
 sudo apt install awscli zip
 # Install pypi
-sudo apt-get install python3-pip -y
+sudo apt install python3-pip
 # Install boto3
-sudo pip install boto3
+sudo pip3 install boto3
 # Install boto3
 sudo pip3 install --upgrade awscli
 # Setup jq
