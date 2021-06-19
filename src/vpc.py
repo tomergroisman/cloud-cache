@@ -7,7 +7,7 @@ app = Flask(__name__)
 cache = Node_Cache()
 instance_id = get_instance_id()
 
-@app.route("/put")
+@app.route("/put", methods=['POST'])
 def put_to_cache():
     print("/put - VPC communication")
 
@@ -18,7 +18,7 @@ def put_to_cache():
     cache.put(str_key, data, expiration_date)
     return f"Success, instance_id: {instance_id}\n"
 
-@app.route("/get")
+@app.route("/get", methods=['GET'])
 def get_from_cache():
   print("/get - VPC communication")
 
