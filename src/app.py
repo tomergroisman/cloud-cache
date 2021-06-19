@@ -21,14 +21,14 @@ def put_to_cache():
     target_node = healthy_nodes[v_node_idx % len(healthy_nodes)]
     alt_target_node = healthy_nodes[(v_node_idx + 1) % len(healthy_nodes)]
 
-    # TODO: Implement def put()
     error = None
     try:
         client.put(target_node, str_key, data, expiration_date)
     except e:
         error = e
 
-    return client.put(alt_target_node, str_key, data, expiration_date)
+    client.put(alt_target_node, str_key, data, expiration_date)
+    return "Success"
     if error is not None:
         raise error 
     # return str(f"hash_value: {hash_value}, target_node_idx: {target_node_idx}, alt_target_node_idx: {alt_target_node_idx}, alinstance_id: {client.instance_id}")
@@ -44,7 +44,6 @@ def get_from_cache():
     target_node = healthy_nodes[v_node_idx % len(healthy_nodes)]
     alt_target_node = healthy_nodes[(v_node_idx + 1) % len(healthy_nodes)]
 
-    # TODO: Implement def put()
     error = None
     try:
         return client.get(target_node, str_key)
