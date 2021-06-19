@@ -18,7 +18,7 @@ class EC2_Client:
     sorted_healthy_targets = sort_by_id(healthy_targets)
     return healthy_targets
 
-  def put(target_node, str_key, data, expiration_date):
+  def put(self, target_node, str_key, data, expiration_date):
     target_node_id = get_target_id(target_node)
     node_ip = client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
     
@@ -31,7 +31,7 @@ class EC2_Client:
 
     return res.text
 
-  def get(target_node, str_key):
+  def get(self, target_node, str_key):
     target_node_id = get_target_id(target_node)
     node_ip = client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
 
