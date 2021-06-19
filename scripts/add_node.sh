@@ -45,6 +45,9 @@ python3 scripts/elb.py register_instance_in_elb $INSTANCE_ID
 echo "deploying code to production"
 scp -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=60" -r ~/.aws src requirements.txt ubuntu@$PUBLIC_IP:/home/ubuntu/
 
+echo "wait 10 seconds..."
+sleep 10
+
 echo "setup production environment"
 ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP <<EOF
     sudo apt update -y
