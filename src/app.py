@@ -29,7 +29,8 @@ def put_to_cache():
         error = e
 
     return client.put(alt_target_node, str_key, data, expiration_date)
-    raise error if error is not None
+    if error is not None:
+        raise error 
     # return str(f"hash_value: {hash_value}, target_node_idx: {target_node_idx}, alt_target_node_idx: {alt_target_node_idx}, alinstance_id: {client.instance_id}")
 
 @app.route("/get")
@@ -51,7 +52,8 @@ def get_from_cache():
         error = e
 
     return client.get(alt_target_node, str_key)
-    raise error if error is not None
+    if error is not None:
+        raise error
 
 @app.route("/health-check")
 def health_check():

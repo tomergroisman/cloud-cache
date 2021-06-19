@@ -23,7 +23,7 @@ class EC2_Client:
     node_ip = client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
     
     url = f"{node_ip}:{VPC_PORT}"
-    res requests.post(url, params={
+    res = requests.post(url, params={
       "str_key": str_key,
       "data": data,
       "expiration_date": expiration_date,
