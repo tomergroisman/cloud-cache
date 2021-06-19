@@ -13,12 +13,14 @@ class EC2_Client:
     self.instance_id = get_instance_id()
 
   def get_healthy_nodes(self):
+    """Get all the healthy nodes"""
     all_targets = self.elb_client.describe_target_health(TargetGroupArn=target_group_arn)["TargetHealthDescriptions"]
     healthy_targets = list(filter(filter_healthy, all_targets))
     sorted_healthy_targets = sort_by_id(healthy_targets)
     return healthy_targets
 
   def put(self, target_node, str_key, data, expiration_date):
+    """Put value to provided node cache"""
     target_node_id = get_target_id(target_node)
     node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
     
@@ -32,6 +34,7 @@ class EC2_Client:
     return res.text
 
   def get(self, target_node, str_key):
+    """Get value from relevant node cache"""
     target_node_id = get_target_id(target_node)
     node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
 
@@ -39,5 +42,18 @@ class EC2_Client:
     res = requests.get(url, params={
       "str_key": str_key
     })
+
+    return res.text
+
+  def get_cache(self, target_node):
+    """Get all values from relevant node cache"""
+    target_node_id = get_target_id(target_node)
+    node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
+
+    url = f"http://{node_ip}:{VPC_PORT}/cache"
+    res = requests.get(url)
+
+    if res.status_code is not 200:
+      return None
 
     return res.text

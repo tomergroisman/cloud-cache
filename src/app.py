@@ -1,3 +1,4 @@
+import json
 from flask import Flask, Response, request
 from xxhash import xxh64
 
@@ -52,6 +53,16 @@ def get_from_cache():
     return client.get(alt_target_node, str_key)
     if error is not None:
         raise error
+
+@app.route("/cache")
+def get_cache():
+    res = []
+    healthy_nodes = client.get_healthy_nodes()
+    for node in healthy_nodes:
+        res.append(client.get_cache(node))
+    
+    print(res)
+    return json.dumps(res)
 
 @app.route("/health-check")
 def health_check():
