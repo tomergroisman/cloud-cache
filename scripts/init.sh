@@ -1,4 +1,6 @@
-# setup AWS CLI
+# Update package manager
+sudo apt update
+# Setup AWS CLI
 sudo apt install awscli zip
 # Configure AWS setup (keys, region, etc)
 sudo aws configure
