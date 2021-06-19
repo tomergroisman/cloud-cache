@@ -10,7 +10,5 @@ class Node_Cache:
     }
 
   def get(self, key):
-    print(self.cache)
     data = self.cache.get(key, {}).get("data", None)
-    print(data)
     return data
