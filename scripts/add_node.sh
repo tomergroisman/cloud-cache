@@ -3,6 +3,10 @@
 
 KEY_NAME="cloud-cache-`date +'%N'`"
 KEY_PEM=".pem/$KEY_NAME.pem"
+INSTANCE_ACCESS_SEC_GRP=$(aws ec2 describe-security-groups \
+    --filters Name=group-name,Values=INSTANCE_ACCESS-* | \
+    jq '.SecurityGroups[0].GroupName' | \
+    tr -d '"')
 
 echo "create pem directory"
 mkdir -p .pem
@@ -43,7 +47,7 @@ scp -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=60" -r ~/.a
 
 echo "setup production environment"
 ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@$PUBLIC_IP <<EOF
-    sudo apt-get update
+    sudo apt update -y
     sudo apt-get install python3-pip -y
     sudo pip install -r requirements.txt
     # run app

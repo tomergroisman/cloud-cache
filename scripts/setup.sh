@@ -28,3 +28,5 @@ python3 scripts/elb.py
 
 # Add two nodes
 source scripts/add_node.sh
+source scripts/add_node.sh
+source scripts/add_node.sh
