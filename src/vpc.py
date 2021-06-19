@@ -31,7 +31,7 @@ def get_cache():
     "instance_id": instance_id,
     "cache": data
   }
-  return json.dumps(res, indent=2)
+  return res
 
 if __name__ == '__main__':
    app.run(host="0.0.0.0", port=8080, debug = True)

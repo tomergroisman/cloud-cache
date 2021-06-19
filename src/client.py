@@ -56,4 +56,4 @@ class EC2_Client:
     if res.status_code is not 200:
       return None
 
-    return res.text
+    return res.json()

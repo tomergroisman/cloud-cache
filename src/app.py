@@ -62,7 +62,7 @@ def get_cache():
         res.append(client.get_cache(node))
     
     print(res)
-    return json.dumps(res)
+    return json.dumps(res, indent=2)
 
 @app.route("/health-check")
 def health_check():
