@@ -26,7 +26,7 @@ aws ec2 authorize-security-group-ingress        \
 python3 scripts/elb.py
 
 
-# Add two nodes
+# Add three nodes
 source scripts/add_node.sh
 source scripts/add_node.sh
 source scripts/add_node.sh

@@ -55,7 +55,9 @@ ssh -i $KEY_PEM -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@
     sudo pip install -r requirements.txt
     # run app
     cd src/
-    nohup python3 app.py & python3 vpc.py && fg
+    nohup python3 app.py &>/dev/null &
+    nohup python3 vpc.py &>/dev/null &
+    exit
 EOF
 
 echo "done."
