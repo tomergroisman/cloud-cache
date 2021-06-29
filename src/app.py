@@ -29,6 +29,8 @@ def put_to_cache():
 
     hash_value = xxh64(str_key).intdigest()
     bucket_idx = hash_value % N_VIRTUAL_NODES
+    healthy_nodes = client.get_healthy_nodes()
+    n_healthy_nodes = len(healthy_nodes)
 
     target_node = healthy_nodes[buckets['mapping'][bucket_idx]['node']]
     alt_target_node = healthy_nodes[(buckets['mapping'][bucket_idx]['node'] + 1) % n_healthy_nodes]
@@ -49,18 +51,19 @@ def get_from_cache():
     str_key = request.args.get('str_key', default="")
 
     hash_value = xxh64(str_key).intdigest()
+    bucket_idx = hash_value % N_VIRTUAL_NODES
     healthy_nodes = client.get_healthy_nodes()
-    v_node_idx = hash_value % N_VIRTUAL_NODES
+    n_healthy_nodes = len(healthy_nodes)
 
-    target_node = healthy_nodes[v_node_idx % len(healthy_nodes)]
-    alt_target_node = healthy_nodes[(v_node_idx + 1) % len(healthy_nodes)]
+    target_node = healthy_nodes[bucket_idx % n_healthy_nodes]
+    alt_target_node = healthy_nodes[(bucket_idx + 1) % n_healthy_nodes]
 
     update_nodes(client, buckets)
 
     error = None
     try:
         return client.get(target_node, bucket_idx, str_key)
-    except e:
+    except Exception as e:
         error = e
 
     return client.get(alt_target_node, bucket_idx, str_key)
@@ -81,14 +84,14 @@ def update_buckets():
     healthy_nodes = client.get_healthy_nodes()
     n_healthy_nodes = len(healthy_nodes)
 
-    for bucket_idx, bucket in enumerate(bucket['mapping']):
+    for bucket_idx, bucket in enumerate(buckets['mapping']):
         prev_node = bucket['node']
-        bucket['node'] = N_VIRTUAL_NODES % n_healthy_nodes
-        my_idx = get_my_node_idx()
+        buckets['mapping'][bucket_idx]['node'] = N_VIRTUAL_NODES % n_healthy_nodes
+        my_idx = get_my_node_idx(healthy_nodes)
         if prev_node == my_idx and bucket['node'] != my_idx:
             client.delete_and_send(bucket_idx)
 
-    return res.data
+    return "Success"
 
 @app.route("/health-check")
 def health_check():

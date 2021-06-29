@@ -27,6 +27,7 @@ def filter_other_healthy(instance_id, targets):
 
 def get_my_node_idx(targets):
   """Filter other healthy targets, beside current target"""
+  instance_id = get_instance_id()
   for idx, target in enumerate(targets):
     if get_target_id(target) == instance_id:
       return idx

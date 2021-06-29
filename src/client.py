@@ -63,7 +63,7 @@ class EC2_Client:
 
     return res.json()
 
-  def update_bucket(self, target_node):
+  def update_buckets(self, target_node):
     target_node_id = get_target_id(target_node)
     node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
 
@@ -73,7 +73,7 @@ class EC2_Client:
     if res.status_code != 200:
       return None
 
-    return res.json()
+    return "Success"
 
   def delete_and_send(bucket_idx):
     my_ip = get_instance_id()
