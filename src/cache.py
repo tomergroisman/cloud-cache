@@ -13,7 +13,6 @@ class Node_Cache:
         "expiration_date": expiration_date
       }
     }
-    print(self._cache)
 
   def put_bucket(self, n_bucket, bucket_data):
     """Put a bucket to the cache"""
@@ -30,7 +29,7 @@ class Node_Cache:
 
   def put_cache(self, cache):
     """Put all instances in cache"""
-    self._cache = cache
+    self._cache = cache.copy()
     return self._cache
 
   def delete(self, n_bucket):

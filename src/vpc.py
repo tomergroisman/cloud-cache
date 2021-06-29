@@ -22,8 +22,9 @@ def put_to_cache():
 
 @app.route("/put-bucket", methods=['POST'])
 def put_bucket_to_cache():
-    n_bucket = request.data.get('n_bucket', -1)
-    bucket_data = request.data.get('bucket_data', {})
+    data = json.loads(request.data)
+    n_bucket = data.get('n_bucket', -1)
+    bucket_data = data.get('bucket_data', {})
 
     cache.put_bucket(n_bucket, bucket_data)
     return f"Success, instance_id: {instance_id}\n"
@@ -52,11 +53,13 @@ def delete_and_send_cache():
   bucket_data = cache.delete()
 
   url = f"http://{node_ip}:{VPC_PORT}/put-bucket"
-  requests.post(url, data={
-    "n_bucket": n_bucket,
-    "bucket_data": bucket_data
-  })
-
+  requests.post(
+    url,
+    data=json.dumps({
+      "n_bucket": n_bucket,
+      "bucket_data": bucket_data    
+    }))
+  
   return "Success"
 
 @app.route("/copy", methods=['POST'])
@@ -66,18 +69,19 @@ def copy_cache():
 
   if target_node_ip and bool(_cache):
     url = f"http://{target_node_ip}:{VPC_PORT}/put-cache"
-    requests.post(url, data={
-      "cache": _cache
-    })
+    requests.post(
+      url, 
+      data=json.dumps({
+        "cache":_cache
+      }))
     return "Success"
   
-  return "None"
+  return None
 
 # send to a the target node through target_node_ip with the new_cache 
 @app.route("/put-cache", methods=['POST'])
 def put_cache():
-  new_cache = request.data.get('cache', {})
-  # ? it's happening is the target node's cache right?
+  new_cache = json.loads(request.data).get('cache', {})
   cache.put_cache(new_cache)
   return "Success"
 
