@@ -13,7 +13,8 @@ N_VIRTUAL_NODES = 1024
 buckets = {
     'mapping': [
         {
-        'node': -1
+        'node': -1,
+        'alt_node': -1
         }
     ] * N_VIRTUAL_NODES,
     'n_healthy_nodes': 0
@@ -73,7 +74,9 @@ def get_from_cache():
 @app.route("/cache")
 def get_cache():
     res = []
+
     healthy_nodes = client.get_healthy_nodes()
+
     for node in healthy_nodes:
         res.append(client.get_cache(node))
     
@@ -84,11 +87,28 @@ def update_buckets():
     healthy_nodes = client.get_healthy_nodes()
     n_healthy_nodes = len(healthy_nodes)
 
+    if n_healthy_nodes == 1:
+        return "Success"
+
+    if n_healthy_nodes == 2:
+        source_idx = get_my_node_idx(healthy_nodes)
+        target_idx = (source_idx + 1) % n_healthy_nodes
+        client.copy(healthy_nodes[source_idx], healthy_nodes[target_idx])
+
+        return "Success"
+
     for bucket_idx, bucket in enumerate(buckets['mapping']):
         prev_node = bucket['node']
+        prev_node_alt = bucket['node']
         buckets['mapping'][bucket_idx]['node'] = N_VIRTUAL_NODES % n_healthy_nodes
+        buckets['mapping'][bucket_idx]['alt_node'] = (N_VIRTUAL_NODES + 1) % n_healthy_nodes
+
         my_idx = get_my_node_idx(healthy_nodes)
-        if prev_node == my_idx and bucket['node'] != my_idx:
+
+        is_in_prev = prev_node == my_idx or prev_node_alt == my_idx
+        is_in_current = bucket['node'] != my_idx or bucket['alt_node']
+    
+        if is_in_prev and is_in_current:
             client.delete_and_send(bucket_idx)
 
     return "Success"

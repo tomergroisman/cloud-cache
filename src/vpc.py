@@ -1,8 +1,10 @@
 from flask import Flask, request
-import json  
+import json
+import requests
 
 from cache import Node_Cache
 from utils import get_instance_id
+from client import VPC_PORT
 
 app = Flask(__name__)
 cache = Node_Cache()
@@ -55,7 +57,25 @@ def delete_and_send_cache():
   })
 
   return "Success"
-  
+
+@app.route("/copy", methods=['POST'])
+def copy_cache():
+  target_node_ip = request.args.get('target_node_ip', None)
+
+  if target_node_ip is not None:
+    url = f"http://{target_node_ip}:{VPC_PORT}/put-cache"
+    res = requests.post(url, data={
+      "cache": cache.get_cache()
+    })
+
+  return "Success"
+
+@app.route("/put-cache", methods=['POST'])
+def put_cache():
+  target_node_ip = request.data.get('cache', {})
+  cache = cache.get_cache()
+
+  return "Success"
 
 if __name__ == '__main__':
    app.run(host="0.0.0.0", port=8081, debug = True)

@@ -26,7 +26,12 @@ class Node_Cache:
     return data
 
   def get_cache(self):
-    """Get all instance cache"""
+    """Get all instances in cache"""
+    return self._cache
+
+  def put_cache(self, cache):
+    """Put all instances in cache"""
+    self._cache = cache
     return self._cache
 
   def delete(self, n_bucket):

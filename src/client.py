@@ -85,3 +85,21 @@ class EC2_Client:
       return None
     
     return res
+  
+  def copy(self, source_node, target_node):
+    source_node_id = get_target_id(source_node)
+    source_node_ip = self.client.describe_instances(InstanceIds=[source_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
+
+    target_node_id = get_target_id(target_node)
+    target_node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
+
+    url = f"http://{source_node_ip}:{VPC_PORT}/copy"
+    res = requests.post(url, params={
+      "target_node_id": target_node_id,
+      "target_node_ip": target_node_ip
+    })
+
+    if res.status_code != 200:
+      return None
+
+    return "Success"
