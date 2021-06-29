@@ -43,14 +43,14 @@ def put_to_cache():
 def get_from_cache():
     str_key = request.args.get('str_key', default="")
 
+    update_nodes(client, buckets)
+
     hash_value = xxh64(str_key).intdigest()
     bucket_idx = hash_value % N_VIRTUAL_NODES
     healthy_nodes = client.get_healthy_nodes()
 
     target_node = healthy_nodes[buckets['mapping'][bucket_idx]['node']]
     alt_target_node = healthy_nodes[buckets['mapping'][bucket_idx]['alt_node']]
-
-    update_nodes(client, buckets)
 
     value = client.get(target_node, bucket_idx, str_key)
     if value == "ERROR":
