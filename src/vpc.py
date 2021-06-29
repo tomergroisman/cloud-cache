@@ -35,7 +35,8 @@ def get_from_cache():
   str_key = request.args.get('str_key', default="")
 
   data = cache.get(n_bucket, str_key)
-  return f"{data}\n"
+
+  return data or "ERROR"
 
 @app.route("/cache", methods=['GET'])
 def get_cache():

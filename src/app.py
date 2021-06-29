@@ -52,19 +52,9 @@ def get_from_cache():
 
     update_nodes(client, buckets)
 
-    error, value = None, None
-    try:
-        value = client.get(target_node, bucket_idx, str_key)
-    except Exception as e:
-        error = e
-
-    print(value)
-    if not value:
+    value = client.get(target_node, bucket_idx, str_key)
+    if value == "ERROR":
         value = client.get(alt_target_node, bucket_idx, str_key)
-
-
-    if error is not None:
-        raise error
 
     return value
 
