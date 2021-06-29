@@ -72,8 +72,8 @@ def copy_cache():
 
 @app.route("/put-cache", methods=['POST'])
 def put_cache():
-  target_node_ip = request.data.get('cache', {})
-  cache = cache.get_cache()
+  new_cache = request.data.get('cache', {})
+  cache.put_cache(new_cache)
 
   return "Success"
 
