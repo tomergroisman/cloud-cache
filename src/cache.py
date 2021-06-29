@@ -21,8 +21,7 @@ class Node_Cache:
 
   def get(self, n_bucket, key):
     """Get value from the cache"""
-    print(self._cache)
-    data = self._cache[n_bucket].get(key, {}).get("data", None)
+    data = self._cache.get(n_bucket, {}).get(key, {}).get("data", None)
     return data
 
   def get_cache(self):
