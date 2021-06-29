@@ -52,7 +52,7 @@ def delete_and_send_cache():
   node_ip = request.args.get('node_ip', None)
   alt_node_ip = request.args.get('alt_node_ip', None)
   n_bucket = request.args.get('n_bucket', -1)
-  bucket_data = cache.delete()
+  bucket_data = cache.delete(n_bucket)
 
   print(request.args)
 

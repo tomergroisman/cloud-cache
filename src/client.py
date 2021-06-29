@@ -80,7 +80,7 @@ class EC2_Client:
     return "Success"
 
   def delete_and_send(self, bucket_idx, node_ip, alt_node_ip):
-    my_ip = get_instance_id()
+    my_ip = self.get_node_ip(get_instance_id())
 
     url = f"http://{my_ip}:{VPC_PORT}/delete_and_send"
     res = requests.post(url, params={
