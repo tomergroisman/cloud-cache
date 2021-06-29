@@ -3,6 +3,7 @@ import requests
 
 from utils import get_instance_id, filter_healthy, sort_by_id, get_target_id
 
+ELB_PORT = 8080
 VPC_PORT = 8081
 
 class EC2_Client:
@@ -19,15 +20,16 @@ class EC2_Client:
     all_targets = self.elb_client.describe_target_health(TargetGroupArn=self.target_group_arn)["TargetHealthDescriptions"]
     healthy_targets = list(filter(filter_healthy, all_targets))
     sorted_healthy_targets = sort_by_id(healthy_targets)
-    return healthy_targets
+    return sorted_healthy_targets
 
-  def put(self, target_node, str_key, data, expiration_date):
+  def put(self, target_node, bucket_idx, str_key, data, expiration_date):
     """Put value to provided node cache"""
     target_node_id = get_target_id(target_node)
     node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
     
     url = f"http://{node_ip}:{VPC_PORT}/put"
     res = requests.post(url, params={
+      "n_bucket": bucket_idx
       "str_key": str_key,
       "data": data,
       "expiration_date": expiration_date,
@@ -35,13 +37,14 @@ class EC2_Client:
 
     return res.text
 
-  def get(self, target_node, str_key):
+  def get(self, target_node, bucket_idx, str_key):
     """Get value from relevant node cache"""
     target_node_id = get_target_id(target_node)
     node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
 
     url = f"http://{node_ip}:{VPC_PORT}/get"
     res = requests.get(url, params={
+      "n_bucket" = bucket_idx
       "str_key": str_key
     })
 
@@ -59,3 +62,26 @@ class EC2_Client:
       return None
 
     return res.json()
+
+  def update_bucket(self, target_node):
+    target_node_id = get_target_id(target_node)
+    node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
+
+    url = f"http://{node_ip}:{ELB_PORT}/update_buckets"
+    res = requests.post(url)
+
+    if res.status_code != 200:
+      return None
+
+    return res.json()
+
+  def delete_and_send(bucket_idx):
+    my_ip = get_instance_id()
+
+    url = f"http://{my_ip}:{VPC_PORT}/delete_and_send"
+    res = requests.post(url, bucket_idx)
+
+    if res.status_code != 200:
+      return None
+    
+    return res
