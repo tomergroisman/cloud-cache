@@ -29,7 +29,7 @@ class EC2_Client:
     
     url = f"http://{node_ip}:{VPC_PORT}/put"
     res = requests.post(url, params={
-      "n_bucket": bucket_idx
+      "n_bucket": bucket_idx,
       "str_key": str_key,
       "data": data,
       "expiration_date": expiration_date,
@@ -44,7 +44,7 @@ class EC2_Client:
 
     url = f"http://{node_ip}:{VPC_PORT}/get"
     res = requests.get(url, params={
-      "n_bucket" = bucket_idx
+      "n_bucket": bucket_idx,
       "str_key": str_key
     })
 

@@ -28,4 +28,4 @@ class Node_Cache:
 
   def delete(self, n_bucket):
     """Delete and send bucket from cache"""
-    return bucket_data = self._cache.pop(n_bucket)
+    return self._cache.pop(n_bucket)

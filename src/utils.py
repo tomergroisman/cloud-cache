@@ -28,8 +28,9 @@ def filter_other_healthy(instance_id, targets):
 def get_my_node_idx(targets):
   """Filter other healthy targets, beside current target"""
   for idx, target in enumerate(targets):
-    if get_target_id(target) == instance_id
-  return idx
+    if get_target_id(target) == instance_id:
+      return idx
+  return -1
 
 def update_nodes(client, buckets):
   healthy_nodes = client.get_healthy_nodes()
