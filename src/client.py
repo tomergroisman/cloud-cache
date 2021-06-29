@@ -75,7 +75,7 @@ class EC2_Client:
 
     return "Success"
 
-  def delete_and_send(bucket_idx):
+  def delete_and_send(self, bucket_idx):
     my_ip = get_instance_id()
 
     url = f"http://{my_ip}:{VPC_PORT}/delete_and_send"

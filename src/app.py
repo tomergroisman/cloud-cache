@@ -34,7 +34,7 @@ def put_to_cache():
     n_healthy_nodes = len(healthy_nodes)
 
     target_node = healthy_nodes[buckets['mapping'][bucket_idx]['node']]
-    alt_target_node = healthy_nodes[(buckets['mapping'][bucket_idx]['node'] + 1) % n_healthy_nodes]
+    alt_target_node = healthy_nodes[buckets['mapping'][bucket_idx]['alt_node']]
 
     error = None
     try:
@@ -56,8 +56,8 @@ def get_from_cache():
     healthy_nodes = client.get_healthy_nodes()
     n_healthy_nodes = len(healthy_nodes)
 
-    target_node = healthy_nodes[bucket_idx % n_healthy_nodes]
-    alt_target_node = healthy_nodes[(bucket_idx + 1) % n_healthy_nodes]
+    target_node = healthy_nodes[buckets['mapping'][bucket_idx]['node']]
+    alt_target_node = healthy_nodes[buckets['mapping'][bucket_idx]['alt_node']]
 
     update_nodes(client, buckets)
 
@@ -67,8 +67,10 @@ def get_from_cache():
     except Exception as e:
         error = e
 
+    print(value)
     if not value:
         value = client.get(alt_target_node, bucket_idx, str_key)
+
 
     if error is not None:
         raise error
@@ -106,7 +108,7 @@ def update_buckets():
         prev_node = bucket['node']
         prev_node_alt = bucket['node']
         buckets['mapping'][bucket_idx]['node'] = N_VIRTUAL_NODES % n_healthy_nodes
-        buckets['mapping'][bucket_idx]['alt_node'] = (N_VIRTUAL_NODES + 1) % n_healthy_nodes
+        buckets['mapping'][bucket_idx]['alt_node'] = ((N_VIRTUAL_NODES % n_healthy_nodes) + 1) % n_healthy_nodes
 
         my_idx = get_my_node_idx(healthy_nodes)
 

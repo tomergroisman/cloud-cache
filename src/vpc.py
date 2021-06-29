@@ -70,7 +70,7 @@ def copy_cache():
     }))
     return "Success"
   
-  return None
+  return "None"
 
 
 @app.route("/put-cache", methods=['POST'])
