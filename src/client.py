@@ -22,10 +22,14 @@ class EC2_Client:
     sorted_healthy_targets = sort_by_id(healthy_targets)
     return sorted_healthy_targets
 
+  def get_node_ip(self, node_id):
+    """Get the ip of a node"""
+    return self.client.describe_instances(InstanceIds=[node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
+
   def put(self, target_node, bucket_idx, str_key, data, expiration_date):
     """Put value to provided node cache"""
     target_node_id = get_target_id(target_node)
-    node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
+    node_ip = self.get_node_ip(target_node_id)
     
     url = f"http://{node_ip}:{VPC_PORT}/put"
     res = requests.post(url, params={
@@ -40,7 +44,7 @@ class EC2_Client:
   def get(self, target_node, bucket_idx, str_key):
     """Get value from relevant node cache"""
     target_node_id = get_target_id(target_node)
-    node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
+    node_ip = self.get_node_ip(target_node_id)
 
     url = f"http://{node_ip}:{VPC_PORT}/get"
     res = requests.get(url, params={
@@ -53,7 +57,7 @@ class EC2_Client:
   def get_cache(self, target_node):
     """Get all values from relevant node cache"""
     target_node_id = get_target_id(target_node)
-    node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
+    node_ip = self.get_node_ip(target_node_id)
 
     url = f"http://{node_ip}:{VPC_PORT}/cache"
     res = requests.get(url)
@@ -65,7 +69,7 @@ class EC2_Client:
 
   def update_buckets(self, target_node):
     target_node_id = get_target_id(target_node)
-    node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
+    node_ip = self.get_node_ip(target_node_id)
 
     url = f"http://{node_ip}:{ELB_PORT}/update_buckets"
     res = requests.post(url)
@@ -75,11 +79,15 @@ class EC2_Client:
 
     return "Success"
 
-  def delete_and_send(self, bucket_idx):
+  def delete_and_send(self, bucket_idx, node_ip, alt_node_ip):
     my_ip = get_instance_id()
 
     url = f"http://{my_ip}:{VPC_PORT}/delete_and_send"
-    res = requests.post(url, bucket_idx)
+    res = requests.post(url, params={
+      'node_ip': node_ip,
+      'alt_node_ip': alt_node_ip,
+      'n_bucket': bucket_idx
+      })
 
     if res.status_code != 200:
       return None
@@ -88,14 +96,14 @@ class EC2_Client:
   
   def copy(self, source_node, target_node):
     source_node_id = get_target_id(source_node)
-    source_node_ip = self.client.describe_instances(InstanceIds=[source_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
+    source_node_ip = self.get_node_ip(source_node_id)
 
     target_node_id = get_target_id(target_node)
-    target_node_ip = self.client.describe_instances(InstanceIds=[target_node_id])["Reservations"][0]["Instances"][0]["PrivateIpAddress"]
+    target_node_ip = self.get_node_ip(target_node_id)
 
     url = f"http://{source_node_ip}:{VPC_PORT}/copy"
     res = requests.post(url, params={
-      "target_node_id": target_node_id,
+      # "target_node_id": target_node_id,
       "target_node_ip": target_node_ip
     })
 

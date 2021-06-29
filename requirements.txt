@@ -1,4 +1,5 @@
 flask
 xxhash
+requests
 
 boto3

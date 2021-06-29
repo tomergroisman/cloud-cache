@@ -23,7 +23,7 @@ def put_to_cache():
 @app.route("/put-bucket", methods=['POST'])
 def put_bucket_to_cache():
     n_bucket = request.data.get('n_bucket', -1)
-    str_key = request.data.get('bucket_data', {})
+    bucket_data = request.data.get('bucket_data', {})
 
     cache.put_bucket(n_bucket, bucket_data)
     return f"Success, instance_id: {instance_id}\n"
@@ -47,11 +47,12 @@ def get_cache():
 
 @app.route("/delete_and_send", methods=['POST'])
 def delete_and_send_cache():
+  node_ip = request.args.get('node_ip', '')
   n_bucket = request.args.get('n_bucket', -1)
   bucket_data = cache.delete()
 
-  url = f"http://{my_ip}:{VPC_PORT}/put-bucket"
-  res = requests.post(url, data={
+  url = f"http://{node_ip}:{VPC_PORT}/put-bucket"
+  requests.post(url, data={
     "n_bucket": n_bucket,
     "bucket_data": bucket_data
   })
@@ -61,24 +62,23 @@ def delete_and_send_cache():
 @app.route("/copy", methods=['POST'])
 def copy_cache():
   target_node_ip = request.args.get('target_node_ip', None)
-  my_cache = cache.get_cache()
+  _cache = cache.get_cache()
 
-  if target_node_ip and bool(my_cache):
+  if target_node_ip and bool(_cache):
     url = f"http://{target_node_ip}:{VPC_PORT}/put-cache"
-    res = requests.post(url, data=json.dumps({
-      "cache": cache.get_cache()
-    }))
+    requests.post(url, data={
+      "cache": _cache
+    })
     return "Success"
   
   return "None"
 
-
+# send to a the target node through target_node_ip with the new_cache 
 @app.route("/put-cache", methods=['POST'])
 def put_cache():
-  print(request.data)
   new_cache = request.data.get('cache', {})
+  # ? it's happening is the target node's cache right?
   cache.put_cache(new_cache)
-
   return "Success"
 
 if __name__ == '__main__':
