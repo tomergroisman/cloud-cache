@@ -61,15 +61,19 @@ def get_from_cache():
 
     update_nodes(client, buckets)
 
-    error = None
+    error, value = None, None
     try:
-        return client.get(target_node, bucket_idx, str_key)
+        value = client.get(target_node, bucket_idx, str_key)
     except Exception as e:
         error = e
 
-    return client.get(alt_target_node, bucket_idx, str_key)
+    if not value:
+        value = client.get(alt_target_node, bucket_idx, str_key)
+
     if error is not None:
         raise error
+
+    return value
 
 @app.route("/cache")
 def get_cache():
