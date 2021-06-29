@@ -13,8 +13,8 @@ N_VIRTUAL_NODES = 1024
 buckets = {
     'mapping': [
         {
-        'node': -1,
-        'alt_node': -1
+            'node': -1,
+            'alt_node': -1
         }
     ] * N_VIRTUAL_NODES,
     'n_healthy_nodes': 0

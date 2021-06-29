@@ -54,25 +54,26 @@ def delete_and_send_cache():
   n_bucket = request.args.get('n_bucket', -1)
   bucket_data = cache.delete(n_bucket)
 
-  print(request.args)
 
-  if node_ip:
-    url1 = f"http://{node_ip}:{VPC_PORT}/put-bucket"
-  if alt_node_ip:
-    url2 = f"http://{alt_node_ip}:{VPC_PORT}/put-bucket"
+  if bucket_data:
+    if node_ip:
+      url = f"http://{node_ip}:{VPC_PORT}/put-bucket"
+      requests.post(
+        url,
+        data={
+          "n_bucket": n_bucket,
+          "bucket_data": bucket_data    
+        })
+    if alt_node_ip:
+      url = f"http://{alt_node_ip}:{VPC_PORT}/put-bucket"
+      requests.post(
+        url,
+        data={
+          "n_bucket": n_bucket,
+          "bucket_data": bucket_data    
+        })
 
-  requests.post(
-    url1,
-    data={
-      "n_bucket": n_bucket,
-      "bucket_data": bucket_data    
-    })
-  requests.post(
-    url2,
-    data={
-      "n_bucket": n_bucket,
-      "bucket_data": bucket_data    
-    })
+    return "Success"
 
 @app.route("/copy", methods=['POST'])
 def copy_cache():
