@@ -29,7 +29,10 @@ class Node_Cache:
 
   def put_cache(self, cache):
     """Put all instances in cache"""
-    self._cache = cache.copy()
+    self._cache = {
+      **self._cache,
+      **cache
+    }
     return self._cache
 
   def delete(self, n_bucket):
