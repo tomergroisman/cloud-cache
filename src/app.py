@@ -90,6 +90,7 @@ def get_cache():
 def update_buckets():
     healthy_nodes = client.get_healthy_nodes()
     n_healthy_nodes = len(healthy_nodes)
+    buckets['n_healthy_nodes'] = n_healthy_nodes
 
     if n_healthy_nodes == 1:
         return "Success"

@@ -61,17 +61,21 @@ def delete_and_send_cache():
 @app.route("/copy", methods=['POST'])
 def copy_cache():
   target_node_ip = request.args.get('target_node_ip', None)
+  my_cache = cache.get_cache()
 
-  if target_node_ip is not None:
+  if target_node_ip and bool(my_cache):
     url = f"http://{target_node_ip}:{VPC_PORT}/put-cache"
-    res = requests.post(url, data={
+    res = requests.post(url, data=json.dumps({
       "cache": cache.get_cache()
-    })
+    }))
+    return "Success"
+  
+  return None
 
-  return "Success"
 
 @app.route("/put-cache", methods=['POST'])
 def put_cache():
+  print(request.data)
   new_cache = request.data.get('cache', {})
   cache.put_cache(new_cache)
 

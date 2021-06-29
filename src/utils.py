@@ -36,6 +36,7 @@ def get_my_node_idx(targets):
 def update_nodes(client, buckets):
   healthy_nodes = client.get_healthy_nodes()
   n_healthy_nodes = len(healthy_nodes)
+
   if healthy_nodes_change(buckets, n_healthy_nodes):
       for node in healthy_nodes:
           client.update_buckets(node)
