@@ -68,7 +68,7 @@ def copy_cache():
   target_node_ip = request.args.get('target_node_ip', None)
   _cache = cache.get_cache()
 
-  if target_node_ip and bool(_cache):
+  if target_node_ip:
     url = f"http://{target_node_ip}:{VPC_PORT}/put-cache"
     requests.post(
       url, 
@@ -77,7 +77,7 @@ def copy_cache():
       }))
     return "Success"
   
-  return None
+  return "ERROR"
 
 # send to a the target node through target_node_ip with the new_cache 
 @app.route("/put-cache", methods=['POST'])
