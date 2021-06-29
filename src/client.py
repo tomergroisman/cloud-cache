@@ -87,7 +87,7 @@ class EC2_Client:
       'node_ip': node_ip,
       'alt_node_ip': alt_node_ip,
       'n_bucket': bucket_idx
-      })
+    })
 
     if res.status_code != 200:
       return None

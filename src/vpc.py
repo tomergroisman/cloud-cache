@@ -49,19 +49,30 @@ def get_cache():
 
 @app.route("/delete_and_send", methods=['POST'])
 def delete_and_send_cache():
-  node_ip = request.args.get('node_ip', '')
+  node_ip = request.args.get('node_ip', None)
+  alt_node_ip = request.args.get('alt_node_ip', None)
   n_bucket = request.args.get('n_bucket', -1)
   bucket_data = cache.delete()
 
-  url = f"http://{node_ip}:{VPC_PORT}/put-bucket"
+  print(request.args)
+
+  if node_ip:
+    url1 = f"http://{node_ip}:{VPC_PORT}/put-bucket"
+  if alt_node_ip:
+    url2 = f"http://{alt_node_ip}:{VPC_PORT}/put-bucket"
+
   requests.post(
-    url,
-    data=json.dumps({
+    url1,
+    data={
       "n_bucket": n_bucket,
       "bucket_data": bucket_data    
-    }))
-  
-  return "Success"
+    })
+  requests.post(
+    url2,
+    data={
+      "n_bucket": n_bucket,
+      "bucket_data": bucket_data    
+    })
 
 @app.route("/copy", methods=['POST'])
 def copy_cache():
