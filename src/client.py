@@ -153,3 +153,18 @@ class EC2_Client:
             raise requests.exceptions.RequestException
 
         return "Success"
+
+    def send_bucket(self, target_node_id, bucket_idx):
+        """Request a target node to copy a bucket"""
+        target_node_ip = self.get_node_ip(target_node_id)
+
+        url = f"http://{target_node_ip}:{VPC_PORT}/send-bucket"
+        res = requests.post(url, params={
+            "node_ip": target_node_ip,
+            "n_bucket": bucket_idx
+        })
+
+        if res.status_code != 200:
+            raise requests.exceptions.RequestException
+
+        return "Success"

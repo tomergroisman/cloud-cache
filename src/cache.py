@@ -23,6 +23,11 @@ class Node_Cache:
         data = self._cache.get(n_bucket, {}).get(key, {}).get("data", None)
         return data
 
+    def get_bucket(self, n_bucket):
+        """Get bucket from the cache"""
+        data = self._cache.get(n_bucket, {})
+        return data
+
     def get_cache(self):
         """Get all instances in cache"""
         return self._cache

@@ -149,6 +149,26 @@ def update_buckets():
                         print(
                             f"Unable to delete and copy: bucket {bucket_idx}"
                         )
+                
+                elif current_node_id == my_id:
+                    try:
+                        client.send_bucket(
+                            current_node_alt_id, bucket_idx
+                        )
+                    except Exception:
+                        print(
+                            f"Unable to copy: bucket {bucket_idx}"
+                        )
+
+                elif current_node_alt_id == my_id:
+                    try:
+                        client.send_bucket(
+                            current_node_id, bucket_idx
+                        )
+                    except Exception:
+                        print(
+                            f"Unable to copy: bucket {bucket_idx}"
+                        )
 
     if n_healthy_nodes == 2:
         source_idx = get_my_node_idx(healthy_nodes)

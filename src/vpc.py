@@ -91,7 +91,28 @@ def delete_and_send_cache():
 
         return "Success"
 
-    return "No data in bucket"
+    return "No data in bucket", 400
+
+@app.route("/send-bucket", methods=['POST'])
+def send_bucket_from_cache():
+    node_ip = request.args.get('node_ip', None)
+    n_bucket = request.args.get('n_bucket', -1)
+
+    bucket_data = cache.get_bucket(n_bucket)
+
+    if bucket_data:
+        if node_ip:
+            url = f"http://{node_ip}:{VPC_PORT}/put-bucket"
+            requests.post(
+                url,
+                data=json.dumps({
+                    "n_bucket": n_bucket,
+                    "bucket_data": bucket_data
+                }))
+
+        return "Success"
+
+    return "No data in bucket", 400
 
 
 @app.route("/copy", methods=['POST'])
