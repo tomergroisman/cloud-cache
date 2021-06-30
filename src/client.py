@@ -57,6 +57,9 @@ class EC2_Client:
             "expiration_date": expiration_date,
         })
 
+        if res.status_code != 200:
+            raise requests.exceptions.RequestException
+
         return res.text
 
     def get(self, target_node, bucket_idx, str_key):
@@ -70,6 +73,9 @@ class EC2_Client:
             "str_key": str_key
         })
 
+        if res.status_code != 200:
+            raise requests.exceptions.RequestException
+
         return res.text
 
     def get_cache(self, target_node):
@@ -81,7 +87,7 @@ class EC2_Client:
         res = requests.get(url)
 
         if res.status_code != 200:
-            return "ERROR"
+            return "ERROR", 400
 
         return res.json()
 
@@ -102,7 +108,7 @@ class EC2_Client:
         res = requests.post(url)
 
         if res.status_code != 200:
-            return "ERROR"
+            return "ERROR", 400
 
         return "Success"
 
@@ -118,7 +124,7 @@ class EC2_Client:
         })
 
         if res.status_code != 200:
-            return "ERROR"
+            return "ERROR", 400
 
         return "Success"
 
@@ -137,6 +143,6 @@ class EC2_Client:
         })
 
         if res.status_code != 200:
-            return "ERROR"
+            return "ERROR", 400
 
         return "Success"

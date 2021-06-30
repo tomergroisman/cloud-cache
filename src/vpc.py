@@ -18,7 +18,11 @@ def put_to_cache():
     data = request.args.get('data', default=None)
     expiration_date = request.args.get('expiration_date', default=None)
 
-    cache.put(n_bucket, str_key, data, expiration_date)
+    try:
+        cache.put(n_bucket, str_key, data, expiration_date)
+    except Exception:
+        return "ERROR", 400
+        
     return f"Success, instance_id: {instance_id}\n"
 
 
@@ -28,7 +32,11 @@ def put_bucket_to_cache():
     n_bucket = data.get('n_bucket', -1)
     bucket_data = data.get('bucket_data', {})
 
-    cache.put_bucket(n_bucket, bucket_data)
+    try:
+        cache.put_bucket(n_bucket, bucket_data)
+    except Exception:
+        return "ERROR", 400
+
     return f"Success, instance_id: {instance_id}\n"
 
 
@@ -39,7 +47,10 @@ def get_from_cache():
 
     data = cache.get(n_bucket, str_key)
 
-    return data or "ERROR"
+    if not data:
+        return "ERROR", 400
+
+    return data
 
 
 @app.route("/cache", methods=['GET'])
@@ -94,7 +105,7 @@ def copy_cache():
             }))
         return "Success"
 
-    return "ERROR"
+    return "ERROR", 400
 
 
 @app.route("/put-cache", methods=['POST'])

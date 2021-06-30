@@ -36,8 +36,20 @@ def put_to_cache():
     target_node = healthy_nodes[buckets['mapping'][bucket_idx]['node']]
     alt_target_node = healthy_nodes[buckets['mapping'][bucket_idx]['alt_node']]
 
-    client.put(target_node, bucket_idx, str_key, data, expiration_date)
-    client.put(alt_target_node, bucket_idx, str_key, data, expiration_date)
+    error, success = None, None
+    try:
+        success = client.put(target_node, bucket_idx, str_key, data, expiration_date)
+    except Exception as e:
+        error = e
+
+    try:
+        success = client.put(alt_target_node, bucket_idx, str_key, data, expiration_date)
+    except Exception as e:
+        error = e
+    
+    if error and not success:
+        return "Unable to put value", 400
+
     return "Success"
 
 
@@ -54,9 +66,14 @@ def get_from_cache():
     target_node = healthy_nodes[buckets['mapping'][bucket_idx]['node']]
     alt_target_node = healthy_nodes[buckets['mapping'][bucket_idx]['alt_node']]
 
-    value = client.get(target_node, bucket_idx, str_key)
-    if value == "ERROR":
-        value = client.get(alt_target_node, bucket_idx, str_key)
+    value = None, None
+    try:
+        value = client.get(target_node, bucket_idx, str_key)
+    except Exception:
+        try:
+            value = client.get(alt_target_node, bucket_idx, str_key)
+        except:
+            return "Unable to get value", 400
 
     return value
 
