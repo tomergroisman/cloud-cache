@@ -124,11 +124,11 @@ def update_buckets():
 
     if n_healthy_nodes > 2:
         my_cache = client.get_cache(
-            filter_target_from_id(get_instance_id())
+            filter_target_from_id(healthy_nodes, get_instance_id())
         )
         for bucket_idx, bucket in enumerate(new_buckets['mapping']):
-            node_in_cache = my_cache['cache'].get(bucket_idx, None)
-            if node_in_cache:
+            is_bucket_in_cache = bool(my_cache['cache'].get(bucket_idx, None))
+            if is_bucket_in_cache:
                 my_id = get_instance_id()
 
                 prev_node_id = buckets['mapping'][bucket_idx]['node']
