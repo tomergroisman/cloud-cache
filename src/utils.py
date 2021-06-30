@@ -63,11 +63,12 @@ def update_buckets(buckets, n_healthy_nodes, n_v_nodes, healthy_nodes):
         "n_healthy_nodes": n_healthy_nodes
     }
     for bucket_idx in range(len(new_buckets['mapping'])):
-        node_idx = n_v_nodes % n_healthy_nodes
-        alt_node_idx = ((n_v_nodes % n_healthy_nodes) + 1) % n_healthy_nodes
+        node_idx = bucket_idx % n_healthy_nodes
+        alt_node_idx = (node_idx + 1) % n_healthy_nodes
 
         new_buckets['mapping'][bucket_idx]['node'] = \
             get_target_id_from_idx(healthy_nodes, node_idx)
         new_buckets['mapping'][bucket_idx]['alt_node'] = \
             get_target_id_from_idx(healthy_nodes, alt_node_idx)
+
     return new_buckets

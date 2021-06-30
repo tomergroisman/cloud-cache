@@ -36,8 +36,6 @@ def put_to_cache():
     bucket_idx = hash_value % N_VIRTUAL_NODES
     healthy_nodes = client.get_healthy_nodes()
 
-    buckets['mapping'][bucket_idx]['is_active'] = True
-
     client.update_nodes(buckets, N_VIRTUAL_NODES)
 
     target_node = filter_target_from_id(
@@ -121,28 +119,30 @@ def update_buckets():
             buckets, n_healthy_nodes, N_VIRTUAL_NODES, healthy_nodes
         )
     )
+    print(">>>> new_buckets['mapping'][840]", new_buckets['mapping'][840])
 
     if n_healthy_nodes > 2:
         my_cache = client.get_cache(
             filter_target_from_id(healthy_nodes, get_instance_id())
         )
         for bucket_idx, bucket in enumerate(new_buckets['mapping']):
-            is_bucket_in_cache = bool(my_cache['cache'].get(bucket_idx, None))
+            is_bucket_in_cache = bool(
+                my_cache['cache'].get(str(bucket_idx), None)
+            )
             if is_bucket_in_cache:
                 my_id = get_instance_id()
-
-                prev_node_id = buckets['mapping'][bucket_idx]['node']
-                prev_node_alt_id = buckets['mapping'][bucket_idx]['alt_node']
 
                 current_node_id = bucket['node']
                 current_node_alt_id = bucket['alt_node']
 
-                is_in_prev = \
-                    prev_node_id == my_id or prev_node_alt_id == my_id
                 is_not_in_current = \
                     current_node_id != my_id and current_node_alt_id != my_id
 
-                if is_in_prev and is_not_in_current:
+                print(">>>>>>>>> my_id", my_id)
+                print(">>>>>>>>> current_node_id", current_node_id)
+                print(">>>>>>>>> current_node_alt_id", current_node_alt_id)
+                print(">>>>>>>>> is_not_in_current", is_not_in_current)
+                if is_not_in_current:
                     node_ip = client.get_node_ip(current_node_id)
                     alt_node_ip = client.get_node_ip(current_node_alt_id)
 
