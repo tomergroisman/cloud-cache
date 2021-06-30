@@ -17,6 +17,11 @@ def get_target_id(target):
     return target["Target"]["Id"]
 
 
+def get_target_id_from_idx(targets, idx):
+    """Get the target instance id"""
+    return targets[idx]["Target"]["Id"]
+
+
 def sort_by_id(targets):
     """Sort target list by id"""
     return sorted(targets, key=get_target_id)
@@ -27,12 +32,13 @@ def filter_healthy(target):
     return target["TargetHealth"]["State"] == "healthy"
 
 
-def filter_other_healthy(instance_id, targets):
-    """Filter other healthy targets, beside current target"""
-    other_targets = [
-        tr for tr in targets if not get_target_id(tr) == instance_id
-    ]
-    return list(filter(filter_healthy, other_targets))
+def filter_target_from_id(targets, target_id):
+    """Filter a target from target id"""
+    return next(
+        target
+        for target in targets
+        if target["Target"]["Id"] == target_id
+    )
 
 
 def get_my_node_idx(targets):
@@ -50,15 +56,18 @@ def healthy_nodes_change(buckets, n_healthy_nodes):
         return True
 
 
-def update_buckets(buckets, n_healthy_nodes, n_v_nodes):
+def update_buckets(buckets, n_healthy_nodes, n_v_nodes, healthy_nodes):
     """Update and return buckets mapping"""
     new_buckets = {
         **buckets,
         "n_healthy_nodes": n_healthy_nodes
     }
     for bucket_idx in range(len(new_buckets['mapping'])):
+        node_idx = n_v_nodes % n_healthy_nodes
+        alt_node_idx = ((n_v_nodes % n_healthy_nodes) + 1) % n_healthy_nodes
+
         new_buckets['mapping'][bucket_idx]['node'] = \
-            n_v_nodes % n_healthy_nodes
+            get_target_id_from_idx(healthy_nodes, node_idx)
         new_buckets['mapping'][bucket_idx]['alt_node'] = \
-            ((n_v_nodes % n_healthy_nodes) + 1) % n_healthy_nodes
+            get_target_id_from_idx(healthy_nodes, alt_node_idx)
     return new_buckets

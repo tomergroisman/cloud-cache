@@ -5,8 +5,8 @@ from xxhash import xxh64
 from client import EC2_Client
 from utils import (
     get_my_node_idx,
-    get_target_id,
     get_instance_id,
+    filter_target_from_id,
     update_buckets as update_my_buckets
 )
 
@@ -39,8 +39,12 @@ def put_to_cache():
     bucket_idx = hash_value % N_VIRTUAL_NODES
     healthy_nodes = client.get_healthy_nodes()
 
-    target_node = healthy_nodes[buckets['mapping'][bucket_idx]['node']]
-    alt_target_node = healthy_nodes[buckets['mapping'][bucket_idx]['alt_node']]
+    target_node = filter_target_from_id(
+        healthy_nodes, buckets['mapping'][bucket_idx]['node']
+    )
+    alt_target_node = filter_target_from_id(
+        healthy_nodes, buckets['mapping'][bucket_idx]['alt_node']
+    )
 
     error, success = None, None
     try:
@@ -75,8 +79,12 @@ def get_from_cache():
     bucket_idx = hash_value % N_VIRTUAL_NODES
     healthy_nodes = client.get_healthy_nodes()
 
-    target_node = healthy_nodes[buckets['mapping'][bucket_idx]['node']]
-    alt_target_node = healthy_nodes[buckets['mapping'][bucket_idx]['alt_node']]
+    target_node = filter_target_from_id(
+        healthy_nodes, buckets['mapping'][bucket_idx]['node']
+    )
+    alt_target_node = filter_target_from_id(
+        healthy_nodes, buckets['mapping'][bucket_idx]['alt_node']
+    )
 
     value = None, None
     try:
@@ -118,17 +126,11 @@ def update_buckets():
             if bucket['is_active']:
                 my_id = get_instance_id()
 
-                prev_node_idx = buckets['mapping'][bucket_idx]['node']
-                prev_node_alt_idx = buckets['mapping'][bucket_idx]['alt_node']
+                prev_node_id = buckets['mapping'][bucket_idx]['node']
+                prev_node_alt_id = buckets['mapping'][bucket_idx]['alt_node']
 
-                prev_node_id = get_target_id(healthy_nodes[prev_node_idx])
-                prev_node_alt_id = \
-                    get_target_id(healthy_nodes[prev_node_alt_idx])
-
-                current_node_id = get_target_id(healthy_nodes[bucket['node']])
-                current_node_alt_id = get_target_id(
-                    healthy_nodes[bucket['alt_node']]
-                )
+                current_node_id = bucket['node']
+                current_node_alt_id = bucket['alt_node']
 
                 is_in_prev = \
                     prev_node_id == my_id or prev_node_alt_id == my_id

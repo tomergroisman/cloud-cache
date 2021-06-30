@@ -8,7 +8,7 @@ from utils import (
     sort_by_id,
     get_target_id,
     healthy_nodes_change,
-    update_buckets
+    update_buckets as utils_update_buckets
 )
 
 ELB_PORT = 8080
@@ -95,7 +95,9 @@ class EC2_Client:
         n_healthy_nodes = len(healthy_nodes)
 
         if healthy_nodes_change(buckets, n_healthy_nodes):
-            buckets = update_buckets(buckets, n_healthy_nodes, n_v_nodes)
+            buckets = utils_update_buckets(
+                buckets, n_healthy_nodes, n_v_nodes, healthy_nodes
+            )
             for idx, node in enumerate(healthy_nodes):
                 try:
                     self.update_buckets(node, buckets)
