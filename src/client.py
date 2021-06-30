@@ -156,9 +156,10 @@ class EC2_Client:
 
     def send_bucket(self, target_node_id, bucket_idx):
         """Request a target node to copy a bucket"""
+        my_ip = self.get_node_ip(get_instance_id())
         target_node_ip = self.get_node_ip(target_node_id)
 
-        url = f"http://{target_node_ip}:{VPC_PORT}/send-bucket"
+        url = f"http://{my_ip}:{VPC_PORT}/send-bucket"
         res = requests.post(url, params={
             "node_ip": target_node_ip,
             "n_bucket": bucket_idx
