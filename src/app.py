@@ -3,7 +3,7 @@ from flask import Flask, Response, request
 from xxhash import xxh64
 
 from client import EC2_Client
-from utils import update_nodes, get_my_node_idx, get_target_id, get_instance_id
+from utils import get_my_node_idx, get_target_id, get_instance_id
 
 app = Flask(__name__)
 client = EC2_Client()
@@ -27,7 +27,7 @@ def put_to_cache():
     data = request.args.get('data', default=None)
     expiration_date = request.args.get('expiration_date', default=None)
 
-    update_nodes(client, buckets)
+    client.update_nodes(client, buckets)
 
     hash_value = xxh64(str_key).intdigest()
     bucket_idx = hash_value % N_VIRTUAL_NODES
@@ -45,7 +45,7 @@ def put_to_cache():
 def get_from_cache():
     str_key = request.args.get('str_key', default="")
 
-    update_nodes(client, buckets)
+    client.update_nodes(client, buckets)
 
     hash_value = xxh64(str_key).intdigest()
     bucket_idx = hash_value % N_VIRTUAL_NODES
@@ -90,6 +90,7 @@ def update_buckets():
 
         if n_healthy_nodes > 2:
             my_id = get_instance_id()
+
             prev_node_id = get_target_id(healthy_nodes[prev_node_idx])
             prev_node_alt_id = get_target_id(healthy_nodes[prev_node_alt_idx])
 
@@ -103,10 +104,11 @@ def update_buckets():
             is_not_in_current = \
                 current_node_id != my_id and current_node_alt_id != my_id
 
-            node_ip = client.get_node_ip(current_node_id)
-            alt_node_ip = client.get_node_ip(current_node_alt_id)
 
             if is_in_prev and is_not_in_current:
+                node_ip = client.get_node_ip(current_node_id)
+                alt_node_ip = client.get_node_ip(current_node_alt_id)
+
                 client.delete_and_send(bucket_idx, node_ip, alt_node_ip)
 
     if n_healthy_nodes == 2:

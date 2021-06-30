@@ -1,7 +1,13 @@
 import boto3
 import requests
 
-from utils import get_instance_id, filter_healthy, sort_by_id, get_target_id
+from utils import (
+    get_instance_id,
+    filter_healthy,
+    sort_by_id,
+    get_target_id,
+    healthy_nodes_change
+)
 
 ELB_PORT = 8080
 VPC_PORT = 8081
@@ -18,15 +24,19 @@ class EC2_Client:
         )
         self.target_group_arn = \
             target_groups["TargetGroups"][0]["TargetGroupArn"]
+        self.healthy_nodes = None
 
     def get_healthy_nodes(self):
         """Get all the healthy nodes"""
-        all_targets = self.elb_client.describe_target_health(
-            TargetGroupArn=self.target_group_arn
-        )["TargetHealthDescriptions"]
-        healthy_targets = list(filter(filter_healthy, all_targets))
-        sorted_healthy_targets = sort_by_id(healthy_targets)
-        return sorted_healthy_targets
+        if not self.healthy_nodes:
+            all_targets = self.elb_client.describe_target_health(
+                TargetGroupArn=self.target_group_arn
+            )["TargetHealthDescriptions"]
+            healthy_targets = list(filter(filter_healthy, all_targets))
+            sorted_healthy_targets = sort_by_id(healthy_targets)
+            self.healthy_nodes = sorted_healthy_targets
+
+        return self.healthy_nodes
 
     def get_node_ip(self, node_id):
         """Get the ip of a node"""
@@ -71,11 +81,20 @@ class EC2_Client:
         res = requests.get(url)
 
         if res.status_code != 200:
-            return None
+            return "ERROR"
 
         return res.json()
 
+    def update_nodes(self, buckets):
+        """Trigger node update in case of healthy nodes change"""
+        n_healthy_nodes = len(self.healthy_nodes)
+
+        if healthy_nodes_change(buckets, n_healthy_nodes):
+            for node in self.healthy_nodes:
+                self.update_buckets(node)
+
     def update_buckets(self, target_node):
+        """Trigger a node to update its buckets list"""
         target_node_id = get_target_id(target_node)
         node_ip = self.get_node_ip(target_node_id)
 
@@ -88,6 +107,7 @@ class EC2_Client:
         return "Success"
 
     def delete_and_send(self, bucket_idx, node_ip, alt_node_ip):
+        """Self request to delete a bucket and put it in its new owners"""
         my_ip = self.get_node_ip(get_instance_id())
 
         url = f"http://{my_ip}:{VPC_PORT}/delete_and_send"
@@ -100,9 +120,10 @@ class EC2_Client:
         if res.status_code != 200:
             return "ERROR"
 
-        return res
+        return "Success"
 
     def copy(self, source_node, target_node):
+        """Request a source node to copy its cache to target node"""
         source_node_id = get_target_id(source_node)
         source_node_ip = self.get_node_ip(source_node_id)
 
@@ -111,7 +132,7 @@ class EC2_Client:
 
         url = f"http://{source_node_ip}:{VPC_PORT}/copy"
         res = requests.post(url, params={
-            # "target_node_id": target_node_id,
+            "target_node_id": target_node_id,
             "target_node_ip": target_node_ip
         })
 
