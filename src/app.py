@@ -20,7 +20,6 @@ buckets = {
         {
             'node': -1,
             'alt_node': -1,
-            'is_active': False,
         }
     ] * N_VIRTUAL_NODES,
     'n_healthy_nodes': 0
@@ -124,8 +123,12 @@ def update_buckets():
     )
 
     if n_healthy_nodes > 2:
+        my_cache = client.get_cache(
+            filter_target_from_id(get_instance_id())
+        )
         for bucket_idx, bucket in enumerate(new_buckets['mapping']):
-            if bucket['is_active']:
+            node_in_cache = my_cache['cache'].get(bucket_idx, None)
+            if node_in_cache:
                 my_id = get_instance_id()
 
                 prev_node_id = buckets['mapping'][bucket_idx]['node']
