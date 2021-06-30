@@ -101,6 +101,8 @@ def get_cache():
 
     healthy_nodes = client.get_healthy_nodes()
 
+    client.update_nodes(buckets, N_VIRTUAL_NODES)
+
     for node in healthy_nodes:
         res.append(client.get_cache(node))
 
