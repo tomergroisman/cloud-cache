@@ -26,19 +26,15 @@ class EC2_Client:
         )
         self.target_group_arn = \
             target_groups["TargetGroups"][0]["TargetGroupArn"]
-        self.healthy_nodes = None
 
     def get_healthy_nodes(self):
         """Get all the healthy nodes"""
-        if not self.healthy_nodes:
-            all_targets = self.elb_client.describe_target_health(
-                TargetGroupArn=self.target_group_arn
-            )["TargetHealthDescriptions"]
-            healthy_targets = list(filter(filter_healthy, all_targets))
-            sorted_healthy_targets = sort_by_id(healthy_targets)
-            self.healthy_nodes = sorted_healthy_targets
-
-        return self.healthy_nodes
+        all_targets = self.elb_client.describe_target_health(
+            TargetGroupArn=self.target_group_arn
+        )["TargetHealthDescriptions"]
+        healthy_targets = list(filter(filter_healthy, all_targets))
+        sorted_healthy_targets = sort_by_id(healthy_targets)
+        return sorted_healthy_targets
 
     def get_node_ip(self, node_id):
         """Get the ip of a node"""
@@ -95,11 +91,12 @@ class EC2_Client:
 
     def update_nodes(self, buckets, n_v_nodes):
         """Trigger node update in case of healthy nodes change"""
-        n_healthy_nodes = len(self.get_healthy_nodes())
+        healthy_nodes = self.get_healthy_nodes()
+        n_healthy_nodes = len(healthy_nodes)
 
         if healthy_nodes_change(buckets, n_healthy_nodes):
             buckets = update_buckets(buckets, n_healthy_nodes, n_v_nodes)
-            for idx, node in enumerate(self.healthy_nodes):
+            for idx, node in enumerate(healthy_nodes):
                 try:
                     self.update_buckets(node, buckets)
                 except Exception:
