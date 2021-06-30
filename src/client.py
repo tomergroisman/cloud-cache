@@ -96,8 +96,11 @@ class EC2_Client:
         n_healthy_nodes = len(self.healthy_nodes)
 
         if healthy_nodes_change(buckets, n_healthy_nodes):
-            for node in self.healthy_nodes:
-                self.update_buckets(node)
+            for idx, node in enumerate(self.healthy_nodes):
+                try:
+                    self.update_buckets(node)
+                except Exception:
+                    print("Unable to update buckets for node of index {idx}")
 
     def update_buckets(self, target_node):
         """Trigger a node to update its buckets list"""
@@ -108,7 +111,7 @@ class EC2_Client:
         res = requests.post(url)
 
         if res.status_code != 200:
-            return "ERROR", 400
+            raise requests.exceptions.RequestException
 
         return "Success"
 
@@ -124,7 +127,7 @@ class EC2_Client:
         })
 
         if res.status_code != 200:
-            return "ERROR", 400
+            raise requests.exceptions.RequestException
 
         return "Success"
 
@@ -143,6 +146,6 @@ class EC2_Client:
         })
 
         if res.status_code != 200:
-            return "ERROR", 400
+            raise requests.exceptions.RequestException
 
         return "Success"

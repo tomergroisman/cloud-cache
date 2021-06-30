@@ -38,15 +38,19 @@ def put_to_cache():
 
     error, success = None, None
     try:
-        success = client.put(target_node, bucket_idx, str_key, data, expiration_date)
+        success = client.put(
+            target_node, bucket_idx, str_key, data, expiration_date
+        )
     except Exception as e:
         error = e
 
     try:
-        success = client.put(alt_target_node, bucket_idx, str_key, data, expiration_date)
+        success = client.put(
+            alt_target_node, bucket_idx, str_key, data, expiration_date
+        )
     except Exception as e:
         error = e
-    
+
     if error and not success:
         return "Unable to put value", 400
 
@@ -72,7 +76,7 @@ def get_from_cache():
     except Exception:
         try:
             value = client.get(alt_target_node, bucket_idx, str_key)
-        except:
+        except Exception:
             return "Unable to get value", 400
 
     return value
@@ -121,17 +125,23 @@ def update_buckets():
             is_not_in_current = \
                 current_node_id != my_id and current_node_alt_id != my_id
 
-
             if is_in_prev and is_not_in_current:
                 node_ip = client.get_node_ip(current_node_id)
                 alt_node_ip = client.get_node_ip(current_node_alt_id)
 
-                client.delete_and_send(bucket_idx, node_ip, alt_node_ip)
+                try:
+                    client.delete_and_send(bucket_idx, node_ip, alt_node_ip)
+                except Exception:
+                    print(f"Unable to delete and copy: bucket {bucket_idx}")
 
     if n_healthy_nodes == 2:
         source_idx = get_my_node_idx(healthy_nodes)
         target_idx = (source_idx + 1) % n_healthy_nodes
-        client.copy(healthy_nodes[source_idx], healthy_nodes[target_idx])
+
+        try:
+            client.copy(healthy_nodes[source_idx], healthy_nodes[target_idx])
+        except Exception:
+            print(f"Unable to copy cache from: {source_idx} to {target_idx}")
 
     return "Success"
 

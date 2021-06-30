@@ -22,7 +22,7 @@ def put_to_cache():
         cache.put(n_bucket, str_key, data, expiration_date)
     except Exception:
         return "ERROR", 400
-        
+
     return f"Success, instance_id: {instance_id}\n"
 
 
@@ -68,6 +68,7 @@ def delete_and_send_cache():
     node_ip = request.args.get('node_ip', None)
     alt_node_ip = request.args.get('alt_node_ip', None)
     n_bucket = request.args.get('n_bucket', -1)
+
     bucket_data = cache.delete(n_bucket)
 
     if bucket_data:
@@ -90,19 +91,24 @@ def delete_and_send_cache():
 
         return "Success"
 
+    return "No data in bucket"
+
 
 @app.route("/copy", methods=['POST'])
 def copy_cache():
     target_node_ip = request.args.get('target_node_ip', None)
-    _cache = cache.get_cache()
 
     if target_node_ip:
         url = f"http://{target_node_ip}:{VPC_PORT}/put-cache"
-        requests.post(
+        res = requests.post(
             url,
             data=json.dumps({
-                "cache": _cache
+                "cache": cache.get_cache()
             }))
+
+        if res.status_code != 200:
+            return "Unable to copy cache", 400
+
         return "Success"
 
     return "ERROR", 400
@@ -111,7 +117,12 @@ def copy_cache():
 @app.route("/put-cache", methods=['POST'])
 def put_cache():
     new_cache = json.loads(request.data).get('cache', {})
-    cache.put_cache(new_cache)
+
+    try:
+        cache.put_cache(new_cache)
+    except Exception:
+        return "Unable to put new cache", 400
+
     return "Success"
 
 
