@@ -151,7 +151,7 @@ def update_buckets():
                         print(
                             f"Unable to delete and copy: bucket {bucket_idx}"
                         )
-                
+
                 elif current_node_id == my_id:
                     try:
                         client.send_bucket(
