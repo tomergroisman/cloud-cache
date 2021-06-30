@@ -33,11 +33,13 @@ def put_to_cache():
     data = request.args.get('data', default=None)
     expiration_date = request.args.get('expiration_date', default=None)
 
-    client.update_nodes(buckets, N_VIRTUAL_NODES)
-
     hash_value = xxh64(str_key).intdigest()
     bucket_idx = hash_value % N_VIRTUAL_NODES
     healthy_nodes = client.get_healthy_nodes()
+
+    buckets['mapping'][bucket_idx]['is_active'] = True
+
+    client.update_nodes(buckets, N_VIRTUAL_NODES)
 
     target_node = filter_target_from_id(
         healthy_nodes, buckets['mapping'][bucket_idx]['node']
@@ -64,8 +66,6 @@ def put_to_cache():
     if error and not success:
         return "Unable to put value", 400
 
-    buckets['mapping'][bucket_idx]['is_active'] = True
-
     return "Success"
 
 
@@ -73,11 +73,11 @@ def put_to_cache():
 def get_from_cache():
     str_key = request.args.get('str_key', default="")
 
-    client.update_nodes(buckets, N_VIRTUAL_NODES)
-
     hash_value = xxh64(str_key).intdigest()
     bucket_idx = hash_value % N_VIRTUAL_NODES
     healthy_nodes = client.get_healthy_nodes()
+
+    client.update_nodes(buckets, N_VIRTUAL_NODES)
 
     target_node = filter_target_from_id(
         healthy_nodes, buckets['mapping'][bucket_idx]['node']
@@ -118,7 +118,9 @@ def update_buckets():
     n_healthy_nodes = len(healthy_nodes)
     new_buckets = json.loads(request.data).get(
         'buckets',
-        update_my_buckets(buckets, n_healthy_nodes, N_VIRTUAL_NODES)
+        update_my_buckets(
+            buckets, n_healthy_nodes, N_VIRTUAL_NODES, healthy_nodes
+        )
     )
 
     if n_healthy_nodes > 2:
