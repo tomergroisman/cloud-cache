@@ -27,7 +27,7 @@ def put_to_cache():
     data = request.args.get('data', default=None)
     expiration_date = request.args.get('expiration_date', default=None)
 
-    client.update_nodes(client, buckets)
+    client.update_nodes(buckets)
 
     hash_value = xxh64(str_key).intdigest()
     bucket_idx = hash_value % N_VIRTUAL_NODES
@@ -57,7 +57,7 @@ def put_to_cache():
 def get_from_cache():
     str_key = request.args.get('str_key', default="")
 
-    client.update_nodes(client, buckets)
+    client.update_nodes(buckets)
 
     hash_value = xxh64(str_key).intdigest()
     bucket_idx = hash_value % N_VIRTUAL_NODES
