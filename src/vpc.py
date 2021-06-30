@@ -10,6 +10,7 @@ app = Flask(__name__)
 cache = Node_Cache()
 instance_id = get_instance_id()
 
+
 @app.route("/put", methods=['POST'])
 def put_to_cache():
     n_bucket = request.args.get('n_bucket', -1)
@@ -20,6 +21,7 @@ def put_to_cache():
     cache.put(n_bucket, str_key, data, expiration_date)
     return f"Success, instance_id: {instance_id}\n"
 
+
 @app.route("/put-bucket", methods=['POST'])
 def put_bucket_to_cache():
     data = json.loads(request.data)
@@ -29,74 +31,78 @@ def put_bucket_to_cache():
     cache.put_bucket(n_bucket, bucket_data)
     return f"Success, instance_id: {instance_id}\n"
 
+
 @app.route("/get", methods=['GET'])
 def get_from_cache():
-  n_bucket = request.args.get('n_bucket', -1)
-  str_key = request.args.get('str_key', default="")
+    n_bucket = request.args.get('n_bucket', -1)
+    str_key = request.args.get('str_key', default="")
 
-  data = cache.get(n_bucket, str_key)
+    data = cache.get(n_bucket, str_key)
 
-  return data or "ERROR"
+    return data or "ERROR"
+
 
 @app.route("/cache", methods=['GET'])
 def get_cache():
-  data = cache.get_cache()
-  res = {
-    "instance_id": instance_id,
-    "cache": data
-  }
-  return res
+    data = cache.get_cache()
+    res = {
+        "instance_id": instance_id,
+        "cache": data
+    }
+    return res
+
 
 @app.route("/delete_and_send", methods=['POST'])
 def delete_and_send_cache():
-  node_ip = request.args.get('node_ip', None)
-  alt_node_ip = request.args.get('alt_node_ip', None)
-  n_bucket = request.args.get('n_bucket', -1)
-  bucket_data = cache.delete(n_bucket)
+    node_ip = request.args.get('node_ip', None)
+    alt_node_ip = request.args.get('alt_node_ip', None)
+    n_bucket = request.args.get('n_bucket', -1)
+    bucket_data = cache.delete(n_bucket)
 
+    if bucket_data:
+        if node_ip:
+            url = f"http://{node_ip}:{VPC_PORT}/put-bucket"
+            requests.post(
+                url,
+                data={
+                    "n_bucket": n_bucket,
+                    "bucket_data": bucket_data
+                })
+        if alt_node_ip:
+            url = f"http://{alt_node_ip}:{VPC_PORT}/put-bucket"
+            requests.post(
+                url,
+                data={
+                    "n_bucket": n_bucket,
+                    "bucket_data": bucket_data
+                })
 
-  if bucket_data:
-    if node_ip:
-      url = f"http://{node_ip}:{VPC_PORT}/put-bucket"
-      requests.post(
-        url,
-        data={
-          "n_bucket": n_bucket,
-          "bucket_data": bucket_data    
-        })
-    if alt_node_ip:
-      url = f"http://{alt_node_ip}:{VPC_PORT}/put-bucket"
-      requests.post(
-        url,
-        data={
-          "n_bucket": n_bucket,
-          "bucket_data": bucket_data    
-        })
+        return "Success"
 
-    return "Success"
 
 @app.route("/copy", methods=['POST'])
 def copy_cache():
-  target_node_ip = request.args.get('target_node_ip', None)
-  _cache = cache.get_cache()
+    target_node_ip = request.args.get('target_node_ip', None)
+    _cache = cache.get_cache()
 
-  if target_node_ip:
-    url = f"http://{target_node_ip}:{VPC_PORT}/put-cache"
-    requests.post(
-      url, 
-      data=json.dumps({
-        "cache":_cache
-      }))
-    return "Success"
-  
-  return "ERROR"
+    if target_node_ip:
+        url = f"http://{target_node_ip}:{VPC_PORT}/put-cache"
+        requests.post(
+            url,
+            data=json.dumps({
+                "cache": _cache
+            }))
+        return "Success"
 
-# send to a the target node through target_node_ip with the new_cache 
+    return "ERROR"
+
+
 @app.route("/put-cache", methods=['POST'])
 def put_cache():
-  new_cache = json.loads(request.data).get('cache', {})
-  cache.put_cache(new_cache)
-  return "Success"
+    new_cache = json.loads(request.data).get('cache', {})
+    cache.put_cache(new_cache)
+    return "Success"
+
 
 if __name__ == '__main__':
-   app.run(host="0.0.0.0", port=8081, debug = True)
+    app.run(host="0.0.0.0", port=8081, debug=True)

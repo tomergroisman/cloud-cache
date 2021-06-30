@@ -2,4 +2,5 @@ flask
 xxhash
 requests
 
+flake8
 boto3
