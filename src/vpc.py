@@ -76,18 +76,18 @@ def delete_and_send_cache():
             url = f"http://{node_ip}:{VPC_PORT}/put-bucket"
             requests.post(
                 url,
-                data={
+                data=json.dumps({
                     "n_bucket": n_bucket,
                     "bucket_data": bucket_data
-                })
+                }))
         if alt_node_ip:
             url = f"http://{alt_node_ip}:{VPC_PORT}/put-bucket"
             requests.post(
                 url,
-                data={
+                data=json.dumps({
                     "n_bucket": n_bucket,
                     "bucket_data": bucket_data
-                })
+                }))
 
         return "Success"
 

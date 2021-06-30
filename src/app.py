@@ -119,7 +119,6 @@ def update_buckets():
             buckets, n_healthy_nodes, N_VIRTUAL_NODES, healthy_nodes
         )
     )
-    print(">>>> new_buckets['mapping'][840]", new_buckets['mapping'][840])
 
     if n_healthy_nodes > 2:
         my_cache = client.get_cache(
@@ -138,10 +137,6 @@ def update_buckets():
                 is_not_in_current = \
                     current_node_id != my_id and current_node_alt_id != my_id
 
-                print(">>>>>>>>> my_id", my_id)
-                print(">>>>>>>>> current_node_id", current_node_id)
-                print(">>>>>>>>> current_node_alt_id", current_node_alt_id)
-                print(">>>>>>>>> is_not_in_current", is_not_in_current)
                 if is_not_in_current:
                     node_ip = client.get_node_ip(current_node_id)
                     alt_node_ip = client.get_node_ip(current_node_alt_id)
