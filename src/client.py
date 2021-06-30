@@ -1,5 +1,6 @@
 import boto3
 import requests
+import json
 
 from utils import (
     get_instance_id,
@@ -102,7 +103,7 @@ class EC2_Client:
                 try:
                     self.update_buckets(node, buckets)
                 except Exception:
-                    print("Unable to update buckets for node of index {idx}")
+                    print(f"Unable to update buckets for node of index {idx}")
 
     def update_buckets(self, target_node, buckets):
         """Trigger a node to update its buckets list"""
@@ -110,9 +111,9 @@ class EC2_Client:
         node_ip = self.get_node_ip(target_node_id)
 
         url = f"http://{node_ip}:{ELB_PORT}/update_buckets"
-        res = requests.post(url, data={
+        res = requests.post(url, data=json.dumps({
             'buckets': buckets
-        })
+        }))
 
         if res.status_code != 200:
             raise requests.exceptions.RequestException

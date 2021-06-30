@@ -113,8 +113,6 @@ def update_buckets():
         update_my_buckets(buckets, n_healthy_nodes, N_VIRTUAL_NODES)
     )
 
-    print(new_buckets)
-
     if n_healthy_nodes > 2:
         for bucket_idx, bucket in enumerate(new_buckets['mapping']):
             if bucket['is_active']:
