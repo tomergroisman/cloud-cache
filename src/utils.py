@@ -48,3 +48,17 @@ def healthy_nodes_change(buckets, n_healthy_nodes):
     """Check for change of healthy nodes status"""
     if buckets['n_healthy_nodes'] != n_healthy_nodes:
         return True
+
+
+def update_buckets(buckets, n_healthy_nodes, n_v_nodes):
+    """Update and return buckets mapping"""
+    new_buckets = {
+        **buckets,
+        "n_healthy_nodes": n_healthy_nodes
+    }
+    for bucket_idx in range(len(new_buckets['mapping'])):
+        new_buckets['mapping'][bucket_idx]['node'] = \
+            n_v_nodes % n_healthy_nodes
+        new_buckets['mapping'][bucket_idx]['alt_node'] = \
+            ((n_v_nodes % n_healthy_nodes) + 1) % n_healthy_nodes
+    return new_buckets

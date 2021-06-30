@@ -6,7 +6,8 @@ from utils import (
     filter_healthy,
     sort_by_id,
     get_target_id,
-    healthy_nodes_change
+    healthy_nodes_change,
+    update_buckets
 )
 
 ELB_PORT = 8080
@@ -91,24 +92,27 @@ class EC2_Client:
 
         return res.json()
 
-    def update_nodes(self, buckets):
+    def update_nodes(self, buckets, n_v_nodes):
         """Trigger node update in case of healthy nodes change"""
-        n_healthy_nodes = len(self.healthy_nodes)
+        n_healthy_nodes = len(self.get_healthy_nodes())
 
         if healthy_nodes_change(buckets, n_healthy_nodes):
+            buckets = update_buckets(buckets, n_healthy_nodes, n_v_nodes)
             for idx, node in enumerate(self.healthy_nodes):
                 try:
-                    self.update_buckets(node)
+                    self.update_buckets(node, buckets)
                 except Exception:
                     print("Unable to update buckets for node of index {idx}")
 
-    def update_buckets(self, target_node):
+    def update_buckets(self, target_node, buckets):
         """Trigger a node to update its buckets list"""
         target_node_id = get_target_id(target_node)
         node_ip = self.get_node_ip(target_node_id)
 
         url = f"http://{node_ip}:{ELB_PORT}/update_buckets"
-        res = requests.post(url)
+        res = requests.post(url, data={
+            'buckets': buckets
+        })
 
         if res.status_code != 200:
             raise requests.exceptions.RequestException
