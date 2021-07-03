@@ -19,7 +19,7 @@ The system use an internal HTTP vpc network, for nodes communication and manage 
 
 ### Set the Admin Instance Environment
 
-To start this app we need to set the environment on an admin instance that manage the nodes./
+To start this app we need to set the environment on an admin instance that manage the nodes.\
 Connect your EC2 instance via SSH and run the following commands in the shell:
 
 ``` bash
@@ -45,6 +45,10 @@ We're able to handle, without data loss, the following scenarios:
 
 ## Modifying the System
 
-You can increase the number of nodes by executing `source scripts/add_node.sh` from the project's root directory.
+You can increase the number of nodes by executing
+``` bash
+source scripts/add_node.sh
+```
+from the project's root directory.
 
 ### Have Fun
